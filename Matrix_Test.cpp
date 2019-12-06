@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(){
-    Matrix m = Matrix(2);
+    Matrix m = Matrix(4);
 
     cout<<m<<endl;
 
@@ -13,7 +13,7 @@ int main(){
 
     cout<<m<<endl;
 
-    Matrix A = Matrix(2);
+    Matrix A = Matrix(4);
 
     A.ScanInValues();
 
@@ -29,6 +29,10 @@ int main(){
     A = A * A;
 
     cout<< A << endl;
+
+    Matrix sub = A.SubMatrix(2,2);
+
+    cout<<sub<<endl;
 
     return 0;
 }

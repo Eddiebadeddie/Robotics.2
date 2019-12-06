@@ -33,15 +33,16 @@ class Matrix{
 
     
     public:
-        Matrix(int n = 4):
+    //-----------------CONSTRUCTORS/DESTRUCTORS-----------------------------------------------
+        Matrix(){
+            size = 0;
+            matrix = NULL;
+        }
+
+        Matrix(int n):
             size(n){
-                matrix = new double* [size];
-                for(int i = 0; i < size; ++i){
-                    matrix[i] = new double[size];
-                    for(int j = 0; j < size; ++j){
-                        matrix[i][j] = 0;
-                    }
-                }
+                matrix = NULL;
+                SetUpMatrix();
         }
         
         Matrix(const Matrix &m){
@@ -63,11 +64,51 @@ class Matrix{
             delete[] matrix;
         }
 
-        Matrix &operator= (const Matrix& m){
-            cout<<"ASSIGNMENT"<<endl;
-            size = m.size;
-            CopyMatrix(m);
-            return *this;
+    //-----------------UTILITIES-------------------------------------------------
+        //Creates a matrix excluding the x row and y column
+        Matrix &SubMatrix(int x, int y){
+            int new_size = size - 1;
+
+            Matrix *sub = new Matrix(new_size);
+
+            for(int i = 0, sub_i = 0; i < size; ++i){
+                if(i == y){
+                    continue;
+                }
+                for(int j = 0, sub_j = 0; j < size; ++j){
+                    if(j == x){
+                        continue;
+                    }
+
+                    sub->matrix[sub_i][sub_j] = matrix[i][j];
+                    ++sub_j;
+                }
+                ++sub_i;
+            }
+
+            return *sub;
+        }
+
+        //Gets the determinant of the matrix
+        double Determinant(){
+            if(size == 2){
+                return (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]);
+            }
+            
+            double sum = 0;
+
+            for(int i = 0; i < size; ++i){
+                Matrix s = SubMatrix(0,i);
+
+                if( i%2 == 0){
+                    sum += s.Determinant();    
+                }
+                else{
+                    sum -= s.Determinant();
+                }
+            }
+
+            return sum;
         }
 
         void ScanInValues(){
@@ -77,6 +118,28 @@ class Matrix{
                     cin>>matrix[i][j];
                 }
             }
+        }
+        
+        void SetUpMatrix(){
+            if(matrix != NULL){
+                cout<<"This matrix already exists"<<endl;
+                return;
+            }
+
+            matrix = new double* [size];
+            for(int i = 0; i < size; ++i){
+                matrix[i] = new double[size];
+                for(int j = 0; j < size; ++j){
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        //------------OPERATORS-------------------------------------------------
+        Matrix &operator= (const Matrix& m){
+            cout<<"ASSIGNMENT"<<endl;
+            size = m.size;
+            CopyMatrix(m);
+            return *this;
         }
 
         friend Matrix &operator*(const Matrix &left, const Matrix &right){
@@ -125,7 +188,6 @@ class Matrix{
             cout << endl << endl;
             return *ret;
         }
-
 
         friend ostream &operator<<(ostream &out, const Matrix &m){
             for(int i = 0; i< m.size ; ++i){
