@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "Polynomial.h"
+
 using namespace std;
 
 #ifndef MATRIX_H
@@ -57,6 +59,27 @@ class Matrix{
             }
         }
 
+        Matrix(Polynomial &x_0, Polynomial &v_0, Polynomial &x_1, Polynomial &v_1){
+            matrix = NULL;
+            size = 4;
+
+            SetUpMatrix();
+
+            for(int i = 0; i < size; ++i){
+                for(int j =0; j < size; ++j){
+                    if(i == 0)
+                        matrix[i][j] = x_0.coefficients[j];
+                    if(i == 1)
+                        matrix[i][j] = v_0.coefficients[j];
+                    if(i == 2)
+                        matrix[i][j] = x_1.coefficients[j];
+                    if(i == 3)
+                        matrix[i][j] = v_1.coefficients[j];
+                    
+                }
+            }
+        }
+
         ~Matrix(){
             for(int i = 0; i < size; ++i){
                 delete[] matrix[i];
@@ -100,11 +123,14 @@ class Matrix{
             for(int i = 0; i < size; ++i){
                 Matrix s = SubMatrix(0,i);
 
+                if(matrix[0][i] == 0)
+                    continue;
+
                 if( i%2 == 0){
-                    sum += s.Determinant();    
+                    sum += (matrix[0][i] * s.Determinant());    
                 }
                 else{
-                    sum -= s.Determinant();
+                    sum -= (matrix[0][i] * s.Determinant());
                 }
             }
 

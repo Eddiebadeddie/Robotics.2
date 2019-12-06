@@ -1,38 +1,24 @@
 #include <iostream>
 
 #include "Matrix.h"
+#include "Polynomial.h"
 
 using namespace std;
 
 int main(){
-    Matrix m = Matrix(4);
+    Polynomial q_0 = Polynomial(0);
+    Polynomial q_1 = Polynomial(1);
 
-    cout<<m<<endl;
+    Polynomial v_0 = q_0.Derive();
+    Polynomial v_1 = q_1.Derive();
 
-    m.ScanInValues();
+    Matrix m = Matrix(q_0, v_0, q_1, v_1);
 
-    cout<<m<<endl;
+    cout<<m << endl;
 
-    Matrix A = Matrix(4);
+    double det = m.Determinant();
 
-    A.ScanInValues();
-
-    A = A * m;
-
-    cout<<endl<<m<<endl;
-
-    m = A + m;
-
-    //cout<<"Made it out of multiplication"<<endl;
-    cout<< m <<endl << endl;
-
-    A = A * A;
-
-    cout<< A << endl;
-
-    Matrix sub = A.SubMatrix(2,2);
-
-    cout<<sub<<endl;
+    cout<<det<<endl;
 
     return 0;
 }
