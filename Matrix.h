@@ -7,223 +7,130 @@ using namespace std;
 #ifndef MATRIX_H
 #define MATRIX_H
 
+class RowVector;
+
+class Linear : public Polynomial{
+    public:
+        Linear();
+        Linear(int x_0, int x_1);
+
+        ~Linear();
+
+        friend ostream &operator<< (ostream &out, const Linear &c);       
+
+        double operator()(double t);
+};
+
+class Quadratic : public Polynomial{
+    public:
+        Quadratic();
+
+        Quadratic(int x_0, int x_1, int x_2);
+
+        ~Quadratic();
+
+        friend ostream &operator<< (ostream &out, const Quadratic &c);
+
+        Linear &Derive();
+
+        double operator()(double t);
+};
+
+class Cubic : public Polynomial{
+    public:
+        Cubic();
+        
+        Cubic(double w, double x, double y, double z);
+
+        Cubic(const RowVector &r);
+
+        ~Cubic();
+
+        Quadratic &Derive();
+
+        void push_back(double num);
+
+        friend ostream &operator<< (ostream &out, const Cubic &c);
+
+        double operator()(double t);
+};
+
 class Matrix{
-    private:
+    protected:
         int size;
         double** matrix;
 
         
-        void CopyMatrix(const Matrix &m){
-            if(size != m.size){
-                cout<<"Could not copy matrix. Dimensions are wrong"<<endl;
-                return;
-            }
+        void CopyMatrix(const Matrix &m);
 
-            CopyMatrix(m.matrix);
-        }
-
-        void CopyMatrix(double** m){
-            for(int i = 0; i < size; ++i){
-                for(int j = 0; j < size; ++j){
-                    cout<<"This matrix["<<i<<" , " <<j<<"] = " <<  matrix[i][j] << endl;
-                    cout<<"That matrix["<<i<<" , " <<j<<"] = " <<  m[i][j] << endl;
-                    matrix[i][j] = m[i][j];
-                    cout<<"Now this matrix["<<i<<" , " <<j<<"] = " <<  matrix[i][j] << endl << endl;
-                }
-            }
-        }
+        void CopyMatrix(double** m);
 
     
     public:
     //-----------------CONSTRUCTORS/DESTRUCTORS-----------------------------------------------
-        Matrix(){
-            size = 0;
-            matrix = NULL;
-        }
+        Matrix();
 
-        Matrix(int n):
-            size(n){
-                matrix = NULL;
-                SetUpMatrix();
-        }
+        Matrix(int n);
         
-        Matrix(const Matrix &m){
-            size = m.size;
-            
-            matrix = new double* [size];
-            for(int i = 0; i < size; ++i){
-                matrix[i] = new double [size];
-                for(int j = 0; j < size; ++j){
-                    matrix[i][j] = m.matrix[i][j];
-                }
-            }
-        }
+        Matrix(const Matrix &m);
 
-        Matrix(Polynomial &x_0, Polynomial &v_0, Polynomial &x_1, Polynomial &v_1){
-            matrix = NULL;
-            size = 4;
+        Matrix(Polynomial &x_0, Polynomial &v_0, Polynomial &x_1, Polynomial &v_1);
 
-            SetUpMatrix();
+        Matrix(char i);
 
-            for(int i = 0; i < size; ++i){
-                for(int j =0; j < size; ++j){
-                    if(i == 0)
-                        matrix[i][j] = x_0.coefficients[j];
-                    if(i == 1)
-                        matrix[i][j] = v_0.coefficients[j];
-                    if(i == 2)
-                        matrix[i][j] = x_1.coefficients[j];
-                    if(i == 3)
-                        matrix[i][j] = v_1.coefficients[j];
-                    
-                }
-            }
-        }
-
-        ~Matrix(){
-            for(int i = 0; i < size; ++i){
-                delete[] matrix[i];
-            }
-            delete[] matrix;
-        }
+        ~Matrix();
 
     //-----------------UTILITIES-------------------------------------------------
         //Creates a matrix excluding the x row and y column
-        Matrix &SubMatrix(int x, int y){
-            int new_size = size - 1;
-
-            Matrix *sub = new Matrix(new_size);
-
-            for(int i = 0, sub_i = 0; i < size; ++i){
-                if(i == y){
-                    continue;
-                }
-                for(int j = 0, sub_j = 0; j < size; ++j){
-                    if(j == x){
-                        continue;
-                    }
-
-                    sub->matrix[sub_i][sub_j] = matrix[i][j];
-                    ++sub_j;
-                }
-                ++sub_i;
-            }
-
-            return *sub;
-        }
+        Matrix &SubMatrix(int x, int y);
 
         //Gets the determinant of the matrix
-        double Determinant(){
-            if(size == 2){
-                return (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]);
-            }
-            
-            double sum = 0;
+        double Determinant();
 
-            for(int i = 0; i < size; ++i){
-                Matrix s = SubMatrix(0,i);
-
-                if(matrix[0][i] == 0)
-                    continue;
-
-                if( i%2 == 0){
-                    sum += (matrix[0][i] * s.Determinant());    
-                }
-                else{
-                    sum -= (matrix[0][i] * s.Determinant());
-                }
-            }
-
-            return sum;
-        }
-
-        void ScanInValues(){
-            for(int i = 0; i < size; ++i){
-                for(int j = 0; j < size; ++j){
-                    cout<<"matrix["<<i<<" , " <<j<<"] = ";
-                    cin>>matrix[i][j];
-                }
-            }
-        }
+        void ScanInValues();
         
-        void SetUpMatrix(){
-            if(matrix != NULL){
-                cout<<"This matrix already exists"<<endl;
-                return;
-            }
+        void SetUpMatrix();
 
-            matrix = new double* [size];
-            for(int i = 0; i < size; ++i){
-                matrix[i] = new double[size];
-                for(int j = 0; j < size; ++j){
-                    matrix[i][j] = 0;
-                }
-            }
-        }
+        double At(int i, int j);
+
+        Matrix &Coffactor();
+
+        Matrix &Adjugate();
         //------------OPERATORS-------------------------------------------------
-        Matrix &operator= (const Matrix& m){
-            cout<<"ASSIGNMENT"<<endl;
-            size = m.size;
-            CopyMatrix(m);
-            return *this;
-        }
+        Matrix &operator= (const Matrix& m);
 
-        friend Matrix &operator*(const Matrix &left, const Matrix &right){
-            cout<<"MULTIPLYING"<<endl;
-            Matrix *ret = new Matrix(left.size);
-            if(left.size != right.size){
-                cout<<"ERROR: matrices sizes are not compatible. Did not multiply"<<endl;
-                return *ret;
-            }
+        friend Matrix &operator*(const Matrix &left, const Matrix &right);
 
-            for(int i = 0; i < left.size; ++i){
-                for(int j = 0; j < left.size; ++j){
-                    double sum = 0;
-                    for (int k = 0; k < left.size; ++k){
-                        sum += (left.matrix[i][k] * right.matrix[k][j]);
-                    }
-                    cout<<"matrix["<<i<<" , " <<j<<"] = " << sum<<"\t";
-                    ret->matrix[i][j] = sum;
-                }
-                //cout<<"iterator"<<endl;
-            }
-            cout << endl << endl;
-            return *ret;
-        }
+        friend Matrix &operator* (const double left, const Matrix &right);
 
-        friend Matrix &operator+(Matrix const &left, Matrix const &right){
-            cout<<"ADDING"<<endl;
-            Matrix *ret = new Matrix(left.size);
-            
-            if(left.size != right.size){
-                cout<<"ERROR: matrices sizes are not compatible. Did not multiply"<<endl;
-                return *ret;
-            }
+        friend Matrix &operator+(Matrix const &left, Matrix const &right);
 
-            cout << "left: \n" << left << endl;
-            cout << "right: \n" << right << endl;
+        friend ostream &operator<<(ostream &out, const Matrix &m);
+};
 
-            for(int i = 0; i < left.size; ++i){
-                for(int j = 0; j < left.size; ++j){
-                    cout<<"matrix["<<i<<" , " <<j<<"] = " <<  left.matrix[i][j] <<"\n";
-                    cout<<"m.matrix["<<i<<" , " <<j<<"] = " <<  right.matrix[i][j] <<"\n";
-                    ret->matrix[i][j] = left.matrix[i][j] + right.matrix[i][j];
-                    cout<<"matrix["<<i<<" , " <<j<<"] = " <<  ret->matrix[i][j] <<"\n\n";
-                }
-            }
-            cout << endl << endl;
-            return *ret;
-        }
+class RowVector: public Matrix{
+    public:
+        double *column;
+        int size = 4;
 
-        friend ostream &operator<<(ostream &out, const Matrix &m){
-            for(int i = 0; i< m.size ; ++i){
-                out<<"[";
-                for(int j = 0; j < m.size; ++j){
-                    out<<m.matrix[i][j]<<", ";
-                }
-                out<<"]"<<endl;
-            }
-            return out;
-        }
+        RowVector();
+
+        RowVector(const RowVector &r);
+
+        ~RowVector();
+
+        void CopyColumn(const RowVector &r);
+
+        void ScanInValues();
+
+        RowVector& operator= (RowVector &right);
+
+        bool operator== (const RowVector &right);
+
+        friend RowVector &operator*  (Matrix &m, const RowVector &r);
+
+        friend ostream &operator<< (ostream &out, const RowVector &r);
+
+        Cubic &CreateCubic();
 };
 #endif

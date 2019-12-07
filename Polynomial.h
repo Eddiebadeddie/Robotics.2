@@ -20,7 +20,8 @@ class RuntimeException{
 };
 
 class Polynomial{
-
+    protected:
+        bool allocated = false;
     public:
         int degree;
         vector<double> coefficients;
@@ -54,8 +55,19 @@ class Polynomial{
             coefficients.push_back(x_3);
         }
 
+        ~Polynomial(){
+            cout<<"~Polynomial"<<endl;
+            coefficients.clear();
+            if(allocated){
+                allocated = false;
+                //free(this);
+            }
+        }
+
         Polynomial &Derive(){
             Polynomial *p = new Polynomial();
+
+            p->Allocate();
 
             p->coefficients.push_back(0);
             p->coefficients.push_back(1);
@@ -86,6 +98,10 @@ class Polynomial{
             }
 
             return out;
+        }
+
+        void Allocate(){
+            allocated = true;
         }
 };
 

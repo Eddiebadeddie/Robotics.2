@@ -6,19 +6,14 @@
 using namespace std;
 
 int main(){
-    Polynomial q_0 = Polynomial(0);
-    Polynomial q_1 = Polynomial(1);
+    Cubic c = Cubic(1,1,1,1);
+    cout<<c<<endl;
+    Quadratic q= c.Derive();
+    cout<<q<<endl;
+    Linear l = q.Derive();
+    cout<<l<<endl;
 
-    Polynomial v_0 = q_0.Derive();
-    Polynomial v_1 = q_1.Derive();
-
-    Matrix m = Matrix(q_0, v_0, q_1, v_1);
-
-    cout<<m << endl;
-
-    double det = m.Determinant();
-
-    cout<<det<<endl;
+    
 
     return 0;
 }

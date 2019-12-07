@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Vector3D.h"
 #include "Queue.h"
+#include <string>
 
 using namespace std;
 
@@ -31,6 +32,11 @@ class Shapes{
 
         //Pure abstract function
         virtual bool DetectCollision(int x, int y, int z) = 0;
+        virtual bool DetectCollision(Coordinate *loc) = 0;
+        virtual bool DetectCollision(Vector3D thru, Coordinate start) = 0;
+        virtual bool DetectCollision(Vector3D *thru, Coordinate start) = 0;
+
+        virtual void Print() = 0;
 };
 
 class Cube: public Shapes{
@@ -57,7 +63,13 @@ class Cube: public Shapes{
             return false;
         }
 
+        virtual bool DetectCollision(Coordinate *loc){
+            return DetectCollision(loc->x, loc->y, loc->z);
+        }
+
+        //Checks for collision in 3D space
         virtual bool DetectCollision(Vector3D thru, Coordinate start){
+            //cout<<"Detecting collision with Cube ("<<x_center<<", " << y_center<< ", " << z_center<< ")"<<endl;
             Vector3D *check = new Vector3D();
             Coordinate temp;
 
@@ -69,6 +81,37 @@ class Cube: public Shapes{
                         temp.Change(i, j, k);
                         check->GetVectorTo(start, temp);
                         if(thru.IsColinear(check)){
+                            //cout<<"Return to DetectCollision"<<endl
+                              //  <<"\tCollision Detected"<<endl;
+                            free(check);
+                            check = NULL;
+                            return true;
+                        }
+                        else{
+                            //cout<<"Return to DetectCollision"<<endl
+                              //  <<"\tCollision not detected"<<endl;
+                        }
+                    }
+                }
+            }
+
+            free(check);
+            check = NULL;
+            return false;
+        }
+
+        virtual bool DetectCollision(Vector3D *thru, Coordinate start){
+            Vector3D *check = new Vector3D();
+            Coordinate temp;
+
+            int dist = sideLength/2;
+
+            for(int i = x_center - dist; i < x_center + dist; ++i){
+                for (int j = y_center - dist; j < y_center + dist; ++j){
+                    for(int k = z_center - dist; k < z_center +dist; ++k){
+                        temp.Change(i, j, k);
+                        check->GetVectorTo(start, temp);
+                        if(thru->IsColinear(check)){
                             free(check);
                             check = NULL;
                             return true;
@@ -82,6 +125,10 @@ class Cube: public Shapes{
             return false;
         }
     
+
+        virtual void Print(){
+            cout<<"Cube at ("<<x_center<<", "<<y_center<<", "<<z_center<<") with sides = "<< sideLength << endl;
+        }
 };
 
 class Sphere: public Shapes{
@@ -111,6 +158,10 @@ class Sphere: public Shapes{
             return false;
         }
 
+        virtual bool DetectCollision(Coordinate *loc){
+            return DetectCollision(loc->x, loc->y, loc->z);
+        }
+
         virtual bool DetectCollision(Vector3D thru, Coordinate start){
             Vector3D *check = new Vector3D();
             Coordinate temp;
@@ -131,6 +182,32 @@ class Sphere: public Shapes{
             free (check);
             check = NULL;
             return false;
+        }
+
+        virtual bool DetectCollision(Vector3D *thru, Coordinate start){
+            Vector3D *check = new Vector3D();
+            Coordinate temp;
+
+            for(int i = x_center - radius; i < x_center + radius; ++i){
+                for (int j = y_center - radius; j < y_center + radius; ++j){
+                    for(int k = z_center - radius; k < z_center +radius; ++k){
+                        temp.Change(i, j, k);
+                        check->GetVectorTo(start, temp);
+                        if(DetectCollision(i,j,k) && thru->IsColinear(check)){
+                            free(check);
+                            check = NULL;
+                            return true;
+                        }
+                    }
+                }
+            }
+            free (check);
+            check = NULL;
+            return false;
+        }
+
+        virtual void Print(){
+            cout<<"Sphere at ("<<x_center<<", "<<y_center<<", "<<z_center<<") with radius = "<< radius<<endl;
         }
 };
 #endif
